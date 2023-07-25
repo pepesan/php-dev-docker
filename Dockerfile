@@ -1,3 +1,4 @@
+# Elegimos la versión de PHP8.1 con Debian Bulleye como base
 FROM php:8.1-fpm-bullseye
 
 # Installing dependencies for the PHP modules
