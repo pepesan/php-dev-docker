@@ -1,0 +1,51 @@
+version: '3.8'
+
+# Services
+services:
+
+  # PHP Service
+  php:
+    build: .
+    container_name: dev-php
+    volumes:
+      - './src:/var/www/html'
+    depends_on:
+      - mariadb
+
+  # Nginx Service
+  nginx:
+    image: nginx:latest
+    container_name: dev-nginx
+    ports:
+      - 80:80
+    links:
+      - 'php'
+    volumes:
+      - './src:/var/www/html'
+      - './conf:/etc/nginx/conf.d'
+    depends_on:
+      - php
+
+  # MariaDB Service
+  mariadb:
+    image: mariadb:11.0.2-jammy
+    container_name: dev-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+    volumes:
+      - ./db-data:/var/lib/mysql
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: dev-phpmyadmin
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mariadb
+    depends_on:
+      - mariadb
+
