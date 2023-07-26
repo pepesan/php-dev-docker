@@ -46,7 +46,7 @@ services:
     # pilla el fichero Dockerfile para crear la imagen
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./Dockerfile.prod
     # nombre del contenedor PHP
     container_name: dev-php
     # definición del volumen con el código PHP

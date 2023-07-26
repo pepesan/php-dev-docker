@@ -16,7 +16,7 @@ docker compose down
 
 # Carpetas Importantes:
 * src: código php
-* conf: fichero de configuración de nginx
+* conf: fichero de configuración de nginx y PHP
 * db-data: volumen de datos de BBDD
 
 # Fichero Dockerfile
@@ -26,3 +26,9 @@ Permite también elegir las extensiones de PHP que necesitemos.
 La primera vez que carguen los contenedores con el docker compose, 
 Creará la imagen de PHP-FPM, por lo que el primer arranque tarará 
 un poco más que el resto de veces
+
+## Entorno Producción
+docker compose -f docker-compose-prod.yaml up -d --force-recreate
+
+## Entorno Moodle
+docker compose -f mi-docker-compose-moodle.yaml up -d --force-recreate

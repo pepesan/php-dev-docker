@@ -46,7 +46,7 @@ services:
     # pilla el fichero Dockerfile para crear la imagen
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./Dockerfile.moodle
     # nombre del contenedor PHP
     container_name: dev-php
     # definición del volumen con el código PHP
@@ -78,7 +78,7 @@ services:
       - './moodledata:/var/www/moodledata'
       # define el volumen con los ficheros de configuración
       # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
-      - './conf/nginx:/etc/nginx/conf.d'
+      - './conf/nginx-moodle/:/etc/nginx/conf.d/'
     # depende del servicio de PHP
     depends_on:
       - php
