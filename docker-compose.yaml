@@ -50,6 +50,7 @@ services:
     # definición del volumen con el código PHP
     volumes:
       - './src:/var/www/html'
+      - './conf/php/php.ini:/usr/local/etc/php/php.ini'
     # dependencia del contenedor mariadb
     depends_on:
       - mariadb
@@ -73,7 +74,7 @@ services:
       - './src:/var/www/html'
       # define el volumen con los ficheros de configuración
       # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
-      - './conf:/etc/nginx/conf.d'
+      - './conf/nginx:/etc/nginx/conf.d'
     # depende del servicio de PHP
     depends_on:
       - php
