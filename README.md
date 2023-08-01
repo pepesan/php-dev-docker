@@ -8,8 +8,8 @@
 docker compose up -d --force-recreate
 
 # URLS de acceso:
-* Entorno PHP: http://localhost:80
-* Entorno PHPMyAdmin: http://localhost:8080
+* Entorno PHP: http://localhost:80 (deberías ver el phpinfo.php)
+* Entorno PHPMyAdmin: http://localhost:8080 (usuario: test/test)
 
 # Parada del Entorno
 docker compose down
@@ -31,4 +31,14 @@ un poco más que el resto de veces
 docker compose -f docker-compose-prod.yaml up -d --force-recreate
 
 ## Entorno Moodle
-docker compose -f mi-docker-compose-moodle.yaml up -d --force-recreate
+- ./init-moodle.sh # esto crea un enlace a la carpeta moodle desde src
+- copia el contenido del fichero moodle.tgz descomprimido a la carpeta moodle
+- docker compose -f mi-docker-compose-moodle.yaml up -d --force-recreate
+- Entra a [http://localhost/](http://localhost/)
+- La bbdd está disponible en:
+  - host: db
+  - database name: test
+  - username: test
+  - password: test
+- Si necesitas cambiar estos valores vete al fichero docker-compose-moodle.yaml
+
