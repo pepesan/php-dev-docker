@@ -46,10 +46,12 @@ services:
     # pilla el fichero Dockerfile para crear la imagen
     build:
       context: .
-      dockerfile: ./Dockerfile.moodle
+      dockerfile: ./Dockerfile.laravel
     # nombre del contenedor PHP
-    container_name: dev-php
+    container_name: laravel-php
     # definición del volumen con el código PHP
+    #ports:
+    #  - 8001:8000
     volumes:
       - './src:/var/www/html'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
@@ -63,7 +65,7 @@ services:
     image: nginx:latest
     # nombre del contenedor
     container_name: dev-nginx
-    # user: "1000:1000"
+    user: "1000:1000"
     # ofrece en el puerto 80 en el host (izquierda)
     # y en este caso el 80 del contenedor (derecha)
     # url: http://localhost:80/ ó http://localhost
@@ -75,11 +77,11 @@ services:
     volumes:
       # Define el volumen con el código de PHP
       - './src:/var/www/html'
-      - './moodledata:/var/www/moodledata'
       - './logs/nginx:/var/log/nginx'
+      #- './moodledata:/var/www/moodledata'
       # define el volumen con los ficheros de configuración
       # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
-      - './conf/nginx-moodle/:/etc/nginx/conf.d/'
+      - './conf/nginx-laravel/:/etc/nginx/conf.d/'
     # depende del servicio de PHP
     depends_on:
       - php

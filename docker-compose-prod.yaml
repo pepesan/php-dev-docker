@@ -75,10 +75,10 @@ services:
     volumes:
       # Define el volumen con el código de PHP
       - './src:/var/www/html'
-      - './moodledata:/var/www/moodledata'
+      - './logs/nginx:/var/log/nginx'
       # define el volumen con los ficheros de configuración
       # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
-      - './conf/nginx:/etc/nginx/conf.d'
+      - './conf/nginx-moodle:/etc/nginx/conf.d'
     # depende del servicio de PHP
     depends_on:
       - php

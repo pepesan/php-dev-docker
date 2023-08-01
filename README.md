@@ -51,3 +51,6 @@ un poco más que el resto de veces
   - password: test
 - Si necesitas cambiar estos valores vete al fichero docker-compose-moodle.yaml
 
+## Entorno Laravel
+
+

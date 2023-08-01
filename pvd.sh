@@ -62,6 +62,15 @@ initialize_moodle() {
     ln -s moodle src
 }
 
+initialize_laravel(){
+  echo "Initializing the application with Laravel-specific configuration."
+  start_laravel
+  docker compose -f docker-compose-laravel.yaml exec -it php composer global require laravel/installer
+  docker compose -f docker-compose-laravel.yaml exec -it php sh -c "echo 'export PATH=$PATH:/root/.composer/vendor/bin' >> /root/.bashrc"
+  docker compose -f docker-compose-laravel.yaml exec -it php sh -c "chown -R www-data:www-data /var/www/html"
+  echo "Now you have composer and laravel command intro the container and available into the PATH"
+}
+
 # Function to start the application in development mode.
 start_development() {
     echo "Starting the application in development mode."
@@ -80,6 +89,12 @@ start_moodle() {
     docker compose -f docker-compose-moodle.yaml up -d --force-recreate
 }
 
+# Function to start the application with Moodle-specific configuration.
+start_laravel() {
+    echo "Starting the application with Moodle-specific configuration."
+    docker compose -f docker-compose-laravel.yaml up -d --force-recreate
+}
+
 # Function to stop the application in development mode.
 stop_development() {
     echo "Stopping the application in development mode."
@@ -96,6 +111,11 @@ stop_moodle() {
     echo "Stopping the application in production mode."
     docker compose -f docker-compose-moodle.yaml down
 }
+
+stop_laravel() {
+    echo "Stopping the application in laravel mode."
+    docker compose -f docker-compose-laravel.yaml down
+}
 show_clean_help(){
     # Display help for the 'container' command.
     echo "Usage: $0 clean [COMMAND]"
@@ -111,12 +131,13 @@ clean_all() {
     echo "Cleaning everything: development, production, and Moodle."
     clean_source_code
     clean_database
+    clean_containers
 }
 
 # Function to clean the database.
 clean_database() {
     echo "Cleaning the database."
-    rm -rf db-data/*
+    sudo rm -rf db-data/*
 }
 
 # Function to clean the source code.
@@ -128,6 +149,7 @@ clean_source_code() {
 }
 clean_containers(){
   echo "Cleaning PHP container image."
+  stop_development
   docker image rm php-dev-docker-php
 }
 
@@ -276,6 +298,9 @@ case "$1" in
             moodle)
                 initialize_moodle
                 ;;
+            laravel)
+                initialize_laravel
+                ;;
             "")
                 # If no option is provided, use 'dev' by default.
                 initialize_development
@@ -298,6 +323,9 @@ case "$1" in
             moodle)
                 start_moodle
                 ;;
+            laravel)
+                start_laravel
+                ;;
             "")
                 # If no option is provided, use 'dev' by default.
                 start_development
@@ -318,8 +346,11 @@ case "$1" in
                 stop_production
                 ;;
             moodle)
-                            stop_moodle
-                            ;;
+                stop_moodle
+                ;;
+            laravel)
+                stop_laravel
+                ;;
             "")
                 # If no option is provided, use 'dev' by default.
                 stop_development
