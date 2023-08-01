@@ -126,6 +126,10 @@ clean_source_code() {
     mkdir -p src
     cp ./init/phpinfo.php src
 }
+clean_containers(){
+  echo "Cleaning PHP container image."
+  docker image rm php-dev-docker-php
+}
 
 run_inside_docker() {
     local container_name="$1"
@@ -156,15 +160,33 @@ help_container(){
   echo "Usage: $0 container [COMMAND]"
   echo
   echo "Available commands:"
-  echo "  help                          Show this help and exit."
-  echo "  ls                            List all running containers."
-  echo "  stop [CONTAINER_NAME]         Stop a running container."
-  echo "  start [CONTAINER_NAME]        Start a stopped container."
-  echo "  rm [CONTAINER_NAME]           Remove a stopped container."
-  echo "  exec [CONTAINER_NAME] [CMD]   Execute a command inside a container."
+  echo "  help                                  Show this help and exit."
+  echo "  ls                                    List all running containers."
+  echo "  stop [CONTAINER_NAME]                 Stop a running container."
+  echo "  start [CONTAINER_NAME]                Start a stopped container."
+  echo "  rm [CONTAINER_NAME]                   Remove a stopped container."
+  echo "  exec [CONTAINER_NAME] [CMD]           Execute a command inside a container with shell."
+  echo "  unattended|un [CONTAINER_NAME] [CMD]  Execute a command inside a container unattended."
 }
 
 run_inside_container() {
+    local container_name="$1"
+    local command_to_run="${2:-/bin/bash}" # Default to /bin/bash if no command is provided
+
+    if [ -z "$container_name" ]; then
+        echo "Please provide a container name as the first argument."
+        show_help
+        exit 1
+    fi
+
+    local docker_command="docker exec -it $container_name $command_to_run"
+    echo "Running the command '$command_to_run' inside the container '$container_name'."
+
+    # Execute the command inside the Docker container.
+    $docker_command
+}
+
+run_inside_container_unattended() {
     local container_name="$1"
     local command_to_run="${2:-/bin/bash}" # Default to /bin/bash if no command is provided
 
@@ -320,6 +342,9 @@ case "$1" in
             src)
                 clean_source_code
                 ;;
+            containers)
+                clean_containers
+                ;;
             help)
                 show_clean_help
                 exit 0
@@ -363,11 +388,17 @@ case "$1" in
                     remove_container "$3"
                     exit 0
                     ;;
+
+                unattended | un)
+                    # Execute a command inside a container.
+                    shift 2 # Remove 'container exec' from the arguments list.
+                    run_inside_container_unattended "$@"
+                    exit 0
+                    ;;
                 exec)
                     # Execute a command inside a container.
                     shift 2 # Remove 'container exec' from the arguments list.
                     run_inside_container "$@"
-                    exit 0
                     ;;
                 *)
                     echo "Invalid option for 'container' command. Use '$0 container help' to see available options."
