@@ -90,6 +90,11 @@ RUN docker-php-ext-install opcache
 
 RUN chmod 777 /var/www
 
+
+# instalando composer
+# Descargar e instalar Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 # poner un php.ini de desarrollo
 # RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 # poner un php.ini de producción

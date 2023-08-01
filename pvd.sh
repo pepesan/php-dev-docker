@@ -22,13 +22,22 @@ show_help() {
     echo "                      - dev: Development shutdown."
     echo "                      - prod: Production shutdown."
     echo "                      If no option is provided, 'dev' will be used by default."
-    echo "  clean [OPTION]      Clean the application with the specified option."
+    echo "  clean [OPTION]"
+    echo "                      : Execute a command into the selected container."
     echo "                      Available options:"
-    echo "                      - all: Clean everything (development, production, Moodle)."
-    echo "                      - database: Clean the database."
-    echo "                      - src: Clean the source code."
+    echo "                      - all: clean code and database"
+    echo "                      - code: clean code"
+    echo "                      - code: clean database data"
     echo "                      - help: Show this help and exit."
-    echo "  -h, --help         Show this help and exit."
+    echo "  container [OPTION]  Clean the application with the specified container."
+    echo "                      Available options:"
+    echo "                      - help: Show this help and exit."
+    echo "                      - ls: List all running containers."
+    echo "                      - stop  [CONTAINER_NAME]: Stop a running container."
+    echo "                      - start [CONTAINER_NAME]: Start a stopped container."
+    echo "                      - rm    [CONTAINER_NAME]: Remove a stopped container."
+    echo "                      - exec  [CONTAINER_NAME] [CMD]: Execute a command inside a container."
+    echo "  help, -h, --help    Show this help and exit."
 }
 
 # Function to initialize the application in development mode.
@@ -87,26 +96,143 @@ stop_moodle() {
     echo "Stopping the application in production mode."
     docker compose -f docker-compose-moodle.yaml down
 }
-
+show_clean_help(){
+    # Display help for the 'container' command.
+    echo "Usage: $0 clean [COMMAND]"
+    echo
+    echo "Available commands:"
+    echo "  help            Show this help and exit."
+    echo "  all             Stop a running container."
+    echo "  database        Start a stopped container."
+    echo "  src             Remove a stopped container."
+}
 # Function to clean everything.
 clean_all() {
     echo "Cleaning everything: development, production, and Moodle."
-    rm -rf src
-    mkdir -p src
-    cp ./init/phpinfo.php src
-    rm -rf db-data/*
+    clean_source_code
+    clean_database
 }
 
 # Function to clean the database.
 clean_database() {
     echo "Cleaning the database."
-    # Place the code for cleaning the database here.
+    rm -rf db-data/*
 }
 
 # Function to clean the source code.
 clean_source_code() {
     echo "Cleaning the source code."
-    # Place the code for cleaning the source code here.
+    rm -rf src
+    mkdir -p src
+    cp ./init/phpinfo.php src
+}
+
+run_inside_docker() {
+    local container_name="$1"
+    shift # Remove the container name from the arguments list
+    local command_to_run="$@" # Get the command to execute inside the container
+
+    if [ -z "$container_name" ]; then
+        echo "Please provide a container name as the first argument."
+        show_help
+        exit 1
+    fi
+
+    if [ -z "$command_to_run" ]; then
+        echo "Please provide a command to execute inside the Docker container."
+        show_help
+        exit 1
+    fi
+
+    local docker_command="docker exec $container_name $command_to_run"
+    echo "Running the command '$command_to_run' inside the Docker container '$container_name'."
+
+    # Execute the command inside the Docker container.
+    $docker_command
+}
+
+help_container(){
+  # Display help for the 'container' command.
+  echo "Usage: $0 container [COMMAND]"
+  echo
+  echo "Available commands:"
+  echo "  help                          Show this help and exit."
+  echo "  ls                            List all running containers."
+  echo "  stop [CONTAINER_NAME]         Stop a running container."
+  echo "  start [CONTAINER_NAME]        Start a stopped container."
+  echo "  rm [CONTAINER_NAME]           Remove a stopped container."
+  echo "  exec [CONTAINER_NAME] [CMD]   Execute a command inside a container."
+}
+
+run_inside_container() {
+    local container_name="$1"
+    local command_to_run="${2:-/bin/bash}" # Default to /bin/bash if no command is provided
+
+    if [ -z "$container_name" ]; then
+        echo "Please provide a container name as the first argument."
+        show_help
+        exit 1
+    fi
+
+    local docker_command="docker exec $container_name $command_to_run"
+    echo "Running the command '$command_to_run' inside the container '$container_name'."
+
+    # Execute the command inside the Docker container.
+    $docker_command
+}
+
+# Function to start a Docker container.
+start_container() {
+    local container_name="$1"
+
+    if [ -z "$container_name" ]; then
+        echo "Please provide a container name as the argument."
+        show_help
+        exit 1
+    fi
+
+    local docker_command="docker start $container_name"
+    echo "Starting the container '$container_name'."
+
+    # Start the Docker container.
+    $docker_command
+}
+
+# Function to stop a Docker container.
+stop_container() {
+    local container_name="$1"
+
+    if [ -z "$container_name" ]; then
+        echo "Please provide a container name as the argument."
+        show_help
+        exit 1
+    fi
+
+    local docker_command="docker stop $container_name"
+    echo "Stopping the container '$container_name'."
+
+    # Stop the Docker container.
+    $docker_command
+}
+
+# Function to remove a Docker container.
+remove_container() {
+    local container_name="$1"
+
+    if [ -z "$container_name" ]; then
+        echo "Please provide a container name as the argument."
+        show_help
+        exit 1
+    fi
+
+    local docker_command="docker rm $container_name"
+    echo "Removing the container '$container_name'."
+
+    # Remove the Docker container.
+    $docker_command
+}
+ls_container(){
+  docker compose ps
 }
 
 # Check if the script was invoked with no arguments or with the help option.
@@ -195,7 +321,7 @@ case "$1" in
                 clean_source_code
                 ;;
             help)
-                show_help
+                show_clean_help
                 exit 0
                 ;;
             "")
@@ -210,8 +336,51 @@ case "$1" in
                 ;;
         esac
         ;;
+    container)
+            # Handle container-related commands.
+            case "$2" in
+                help)
+                    help_container
+                    exit 0
+                    ;;
+                ls)
+                    # List all running containers.
+                    ls_container
+                    exit 0
+                    ;;
+                stop)
+                    # Stop a running container.
+                    stop_container "$3"
+                    exit 0
+                    ;;
+                start)
+                    # Start a stopped container.
+                    start_container "$3"
+                    exit 0
+                    ;;
+                rm)
+                    # Remove a stopped container.
+                    remove_container "$3"
+                    exit 0
+                    ;;
+                exec)
+                    # Execute a command inside a container.
+                    shift 2 # Remove 'container exec' from the arguments list.
+                    run_inside_container "$@"
+                    exit 0
+                    ;;
+                *)
+                    echo "Invalid option for 'container' command. Use '$0 container help' to see available options."
+                    exit 1
+                    ;;
+            esac
+            ;;
+    help | -h | --help)
+            show_help
+            exit 0
+            ;;
     *)
-        echo "Invalid command. Use '$0 --help' to see available options."
+        echo "Invalid command. Use '$0 help' to see available options."
         exit 1
         ;;
 esac
