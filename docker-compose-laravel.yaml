@@ -50,11 +50,12 @@ services:
     # nombre del contenedor PHP
     container_name: laravel-php
     # definición del volumen con el código PHP
-    #ports:
-    #  - 8001:8000
+    ports:
+      - 8000:8000
     volumes:
       - './src:/var/www/html'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
+    # command: ["php","blog/artisan", "serve"]
     # dependencia del contenedor mariadb
     depends_on:
       - db
@@ -62,10 +63,10 @@ services:
   # Nginx Service
   nginx:
     # pilla la última imagen de nginx
-    image: nginx:latest
+    image: nginx:stable-bullseye
     # nombre del contenedor
     container_name: dev-nginx
-    user: "1000:1000"
+    # user: "1000:1000"
     # ofrece en el puerto 80 en el host (izquierda)
     # y en este caso el 80 del contenedor (derecha)
     # url: http://localhost:80/ ó http://localhost

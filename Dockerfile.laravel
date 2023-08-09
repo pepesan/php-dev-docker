@@ -97,8 +97,33 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 RUN export PATH=$PATH:/root/.composer/vendor/bin
 
+# Install
+RUN apt install curl vim elinks -y
+
 
 # poner un php.ini de desarrollo
 # RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 # poner un php.ini de producción
 # RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+
+
+# Instalación de NVM
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
+WORKDIR /root
+#RUN export NVM_DIR=$HOME/.nvm \
+#    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+#    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+
+#RUN source /root/.bashrc
+# Instalación de NODEJS
+#RUN nvm install 18
+#RUN nvm use 18
+
+
+WORKDIR /var/www/html
+EXPOSE 8000
+
+
+

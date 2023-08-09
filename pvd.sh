@@ -143,7 +143,7 @@ clean_database() {
 # Function to clean the source code.
 clean_source_code() {
     echo "Cleaning the source code."
-    rm -rf src
+    sudo rm -rf src
     mkdir -p src
     cp ./init/phpinfo.php src
 }
