@@ -93,7 +93,7 @@ services:
     # y en este caso el 80 del contenedor (derecha)
     # url: http://localhost:80/ ó http://localhost
     ports:
-      - 80:80
+      - 81:80
     #links:
     #  - 'php'
 
@@ -107,6 +107,26 @@ services:
     # depende del servicio de PHP
     depends_on:
       - php
+  # Varnish Container
+  varnish:
+    image: varnish:fresh
+    depends_on:
+      - nginx
+    container_name: dev-varnish
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      # if you want to check the logs
+      - ./logs/varnish:/var/log/
+      - ./conf/varnish-wordpress/varnish.vcl:/etc/varnish/default.vcl:ro
+    environment:
+      BACKENDS: "nginx"
+      BACKENDS_PORT: 80
+      BACKENDS_PROBE_ENABLED: "false"
+    logging:
+      options:
+        max-size: 10m
 
 
 
