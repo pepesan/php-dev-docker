@@ -1,4 +1,8 @@
 .idea/*
 db-data/*
 moodle/*
+wordpress/*
+laravel/*
 logs/*
+
+latest-es_ES.tar.gz

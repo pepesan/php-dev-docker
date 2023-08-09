@@ -6,7 +6,9 @@
   * Docker Compose
 
 # Inicialización del Entorno
-./pvd.sh init
+```shell
+./pdd init
+```
 
 # Lanzamiento del Entorno
 - Usando el comando personalizado: ./pvd.sh start
@@ -17,7 +19,10 @@
 * Entorno PHPMyAdmin: http://localhost:8080 (usuario: test/test)
 
 # Parada del Entorno
-- Usando el comando personalizado: ./pvd.sh stop
+- Usando el comando personalizado:
+```shell
+./pdd stop
+```
 - Con el Docker compose: docker compose down
 
 
@@ -35,11 +40,33 @@ Creará la imagen de PHP-FPM, por lo que el primer arranque tarará
 un poco más que el resto de veces
 
 ## Entorno Producción
-- Usando el comando personalizado: ./pvd.sh start prod
-- Con el Docker compose: docker compose -f docker-compose-prod.yaml up -d --force-recreate
+- Usando el comando personalizado: 
+```shell 
+./pdd start prod
+```
+- Arrancará: docker compose -f docker-compose-prod.yaml up -d --force-recreate
+
+## Entorno Wordpress
+```shell
+./pdd init wordpress # esto crea un enlace a la carpeta wordpress desde src
+```
+* esto crea un enlace a la carpeta wordpress desde src
+* copia el fichero phpinfo.php a src
+* arranca el entorno wordpress: docker compose -f docker-compose-wordpress.yaml up -d --force-recreate
+* Descarga la última versión de wordpress: [https://es.wordpress.org/latest-es_ES.tar.gz](https://es.wordpress.org/latest-es_ES.tar.gz)
+* Descomprime el contenido en la carpeta wordpress
+* Ya deberías poder entrar a [http://localhost/](http://localhost/)
+- La bbdd está disponible en:
+  - host: db
+  - database name: test
+  - username: test
+  - password: test
+- Si necesitas cambiar estos valores vete al fichero docker-compose-moodle.yaml
 
 ## Entorno Moodle
-- ./init-moodle.sh # esto crea un enlace a la carpeta moodle desde src
+```shell
+./pdd init moodle # esto crea un enlace a la carpeta moodle desde src
+```
 - copia el contenido del fichero moodle.tgz descomprimido a la carpeta moodle
 - Usando el comando personalizado: ./pvd.sh start moodle
 - Con el Docker compose: docker compose -f docker-compose-prod.yaml up -d --force-recreate
@@ -52,7 +79,9 @@ un poco más que el resto de veces
 - Si necesitas cambiar estos valores vete al fichero docker-compose-moodle.yaml
 
 ## Entorno Laravel
-- ./pvd.sh init laravel
+```shell
+./pdd init laravel # esto crea un enlace a la carpeta laravel desde src
+```
 - Entrar al contenedor php: ./pvd.sh container exec laravel-php /bin/bash
 - Dentro del contenedor:
   - Creamos el proyecto
@@ -74,7 +103,10 @@ un poco más que el resto de veces
     DB_PASSWORD=test</pre>
   - Aplica el esquema de la bbdd: php artisan migrate
   - esto debería darte una salida similar a la siguiente:
-  <code>php artisan migrate
+  ```shell 
+  php artisan migrate
+  ```
+```output
 Cannot load Zend OPcache - it was already loaded
 
 INFO  Preparing database.
@@ -86,7 +118,9 @@ INFO  Running migrations.
 2014_10_12_000000_create_users_table ................................................................................................... 30ms DONE
 2014_10_12_100000_create_password_reset_tokens_table ................................................................................... 29ms DONE
 2019_08_19_000000_create_failed_jobs_table ............................................................................................. 27ms DONE
-2019_12_14_000001_create_personal_access_tokens_table .................................................................................. 51ms DONE</code>
+2019_12_14_000001_create_personal_access_tokens_table .................................................................................. 51ms DONE
+```
+
   - Lanza la aplicación: php artisan serve
   - Eso debería abrir el puerto 8000 dentro del contenedor: curl http://localhost:8000 
   - Pero debería estar disponible en tu host en [http://localhost:8001/](http://localhost:8001/)

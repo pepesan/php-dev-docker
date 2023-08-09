@@ -1,0 +1,113 @@
+version: '3.8'
+
+# Services
+services:
+
+  # MariaDB Service
+  db:
+    # imagen de mariadb
+    image: mariadb:11.0.2-jammy
+    # nombre del contenedor
+    container_name: dev-mariadb
+    # variables de entorno
+    environment:
+      # contraseña de root
+      MYSQL_ROOT_PASSWORD: root
+      # nombre de la BBDD
+      MYSQL_DATABASE: test
+      # usuario de acceso a la BBDD
+      MYSQL_USER: test
+      # contraseña de acceso a ls BBD
+      MYSQL_PASSWORD: test
+    # Volumen con los datos de la BBDD
+    volumes:
+      - ./db-data:/var/lib/mysql
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    # imagen de Phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    # nombre del contenedor
+    container_name: dev-phpmyadmin
+    # accedemos al puerto 8080 local (host) (izquierda)
+    # aunque el puerto del contenedor es el 80 (derecha)
+    # URL: http://localhost:8080
+    ports:
+      - 8080:80
+    # Variables de entorno
+    environment:
+      # definición del nombre del host(contenedor) de la BBDD
+      PMA_HOST: db
+    # Se arranca después del contenedor de la BBDD
+    depends_on:
+      - db
+  # PHP Service
+  php:
+    # pilla el fichero Dockerfile para crear la imagen
+    build:
+      context: .
+      dockerfile: Dockerfile.wordpress
+    # nombre del contenedor PHP
+    container_name: dev-php
+    # definición del volumen con el código PHP
+    volumes:
+      - './src:/var/www/html'
+      - './conf/php/php.ini:/usr/local/etc/php/php.ini'
+    # dependencia del contenedor mariadb
+    environment:
+      # host de mysql
+      MYSQL_HOST: db
+      # port de mysql
+      MYSQL_PORT: 3306
+      # contraseña de root
+      MYSQL_ROOT_PASSWORD: root
+      # nombre de la BBDD
+      MYSQL_DATABASE: test
+      # usuario de acceso a la BBDD
+      MYSQL_USER: test
+      # contraseña de acceso a ls BBDD
+      MYSQL_PASSWORD: test
+      # ruta del servicio
+      SITE_URL: http://localhost
+      # Título del sitio
+      SITE_TITLE: "Mi Sitio WordPress"
+      # Admin user
+      ADMIN_USER: admin
+      # Admin password
+      ADMIN_PASSWORD: admin
+      # Admin email
+      ADMIN_EMAIL: admin@example.com
+      # Language to Install
+      WP_LANG: es_ES
+    depends_on:
+      - db
+
+  # Nginx Service
+  nginx:
+    # pilla la última imagen de nginx
+    image: nginx:latest
+    # nombre del contenedor
+    container_name: dev-nginx
+    # user: "1000:1000"
+    # ofrece en el puerto 80 en el host (izquierda)
+    # y en este caso el 80 del contenedor (derecha)
+    # url: http://localhost:80/ ó http://localhost
+    ports:
+      - 80:80
+    #links:
+    #  - 'php'
+
+    volumes:
+      # Define el volumen con el código de PHP
+      - './src:/var/www/html'
+      - './logs/nginx:/var/log/nginx'
+      # define el volumen con los ficheros de configuración
+      # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
+      - './conf/nginx:/etc/nginx/conf.d'
+    # depende del servicio de PHP
+    depends_on:
+      - php
+
+
+
+
