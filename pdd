@@ -87,7 +87,6 @@ initialize_wordpress() {
     docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp core config --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --dbhost=$MYSQL_HOST --allow-root'
     # Crea al bbdd
     # docker compose -f docker-compose-wordpress.yaml exec -it php wp db create --allow-root
-    install_wordpress
 }
 # Function to initialize the application with Moodle-specific configuration.
 initialize_wordpress_prod() {
