@@ -52,6 +52,7 @@ services:
     # definición del volumen con el código PHP
     volumes:
       - './src:/var/www/html'
+      - './logs/php-fpm:/var/www/logs'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
     # dependencia del contenedor mariadb
     environment:
@@ -85,7 +86,7 @@ services:
       - db
 
   # Nginx Service
-  wp-nginx:
+  nginx:
     # pilla la última imagen de nginx
     image: nginx:latest
     # nombre del contenedor
@@ -113,20 +114,24 @@ services:
   varnish:
     image: varnish:fresh
     depends_on:
-      - wp-nginx
+      - nginx
     container_name: wp-varnish
     restart: always
     ports:
       - 81:80
     volumes:
       # if you want to check the logs
-      - ./logs/varnish:/var/log/
+      # - ./logs/varnish:/var/log/
       - ./conf/varnish-wordpress/varnish-prod.vcl:/etc/varnish/default.vcl:ro
+    # tmpfs:
+      - ./logs/varnish:/var/lib/varnish:exec
     networks:
       - deploy-nginx_nginx_network
       - default
+
+
     environment:
-      BACKENDS: "wp-nginx"
+      BACKENDS: "nginx"
       BACKENDS_PORT: 80
       BACKENDS_PROBE_ENABLED: "false"
     logging:
