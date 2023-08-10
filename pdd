@@ -87,20 +87,7 @@ initialize_wordpress() {
     docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp core config --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --dbhost=$MYSQL_HOST --allow-root'
     # Crea al bbdd
     # docker compose -f docker-compose-wordpress.yaml exec -it php wp db create --allow-root
-    # realiza la instalación
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp core install --url=$SITE_URL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
-    # instalar el idioma
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp language core install $WP_LANG --allow-root'
-    # Elegir idioma por defecto
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp site switch-language $WP_LANG --allow-root'
-    # Actualizar traducciones de core
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp language core update --allow-root'
-    # Actualizar plugins instalados
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp plugin update --all --allow-root'
-    # Autoactualizar plugins instalados
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp plugin auto-updates enable --all --allow-root'
-    # Change permissions
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+    install_wordpress
 }
 # Function to initialize the application with Moodle-specific configuration.
 initialize_wordpress_prod() {
@@ -117,6 +104,16 @@ initialize_wordpress_prod() {
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core config --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --dbhost=$MYSQL_HOST --allow-root'
     # Crea al bbdd
     # docker compose -f docker-compose-wordpress-prod.yaml exec -it php wp db create --allow-root
+}
+initialize_laravel(){
+  echo "Initializing the application with Laravel-specific configuration."
+  start_laravel
+  docker compose -f docker-compose-laravel.yaml exec -it php composer global require laravel/installer
+  docker compose -f docker-compose-laravel.yaml exec -it php sh -c "echo 'export PATH=$PATH:/root/.composer/vendor/bin' >> /root/.bashrc"
+  docker compose -f docker-compose-laravel.yaml exec -it php sh -c "chown -R www-data:www-data /var/www/html"
+  echo "Now you have composer and laravel command intro the container and available into the PATH"
+}
+install_wordpress(){
     # realiza la instalación
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$SITE_URL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
     # instalar el idioma
@@ -135,18 +132,38 @@ initialize_wordpress_prod() {
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
     # Change permissions
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
-
-
 }
 
-initialize_laravel(){
-  echo "Initializing the application with Laravel-specific configuration."
-  start_laravel
-  docker compose -f docker-compose-laravel.yaml exec -it php composer global require laravel/installer
-  docker compose -f docker-compose-laravel.yaml exec -it php sh -c "echo 'export PATH=$PATH:/root/.composer/vendor/bin' >> /root/.bashrc"
-  docker compose -f docker-compose-laravel.yaml exec -it php sh -c "chown -R www-data:www-data /var/www/html"
-  echo "Now you have composer and laravel command intro the container and available into the PATH"
+install_wordpress_prod(){
+    # realiza la instalación
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$SITE_URL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
+    # instalar el idioma
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core install $WP_LANG --allow-root'
+    # Elegir idioma por defecto
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp site switch-language $WP_LANG --allow-root'
+    # Actualizar traducciones de core
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core update --allow-root'
+    # Actualizar plugins instalados
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin update --all --allow-root'
+    # Autoactualizar plugins instalados
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin auto-updates enable --all --allow-root'
+    # Config SiteURL
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
+    # Config SiteURL
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
+    # Change permissions
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
 }
+show_install_help(){
+    # Display help for the 'container' command.
+    echo "Usage: $0 install [COMMAND]"
+    echo
+    echo "Available commands:"
+    echo "  help            Show this help and exit."
+    echo "  wordpress       Install wordpress into the container."
+    echo "  wordpress_prod       Install wordpress into the container."
+}
+
 
 # Function to start the application in development mode.
 start_development() {
@@ -555,10 +572,30 @@ case "$1" in
                     ;;
             esac
             ;;
+    install)
+      case "$2" in
+        wordpress)
+          install_wordpress
+          exit 0
+          ;;
+        wordpress_prod)
+          install_wordpress_prod
+          exit 0
+          ;;
+        help)
+          show_install_help
+          exit 0
+          ;;
+        *)
+          echo "Invalid option for 'install' command. Use '$0 container help' to see available options."
+          exit 1
+          ;;
+      esac
+      ;;
     help | -h | --help)
-            show_help
-            exit 0
-            ;;
+      show_help
+      exit 0
+      ;;
     *)
         echo "Invalid command. Use '$0 help' to see available options."
         exit 1
