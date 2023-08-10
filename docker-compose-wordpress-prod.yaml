@@ -79,6 +79,8 @@ services:
       ADMIN_EMAIL: admin@example.com
       # Language to Install
       WP_LANG: es_ES
+      # Site base url
+      WP_SITEURL: http://localhost:80/
     depends_on:
       - db
 
