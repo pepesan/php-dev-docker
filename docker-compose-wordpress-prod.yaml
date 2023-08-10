@@ -103,7 +103,7 @@ services:
       - './logs/nginx:/var/log/nginx'
       # define el volumen con los ficheros de configuración
       # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
-      - './conf/nginx-wordpress:/etc/nginx/conf.d'
+      - './conf/nginx-wordpress-prod:/etc/nginx/conf.d'
     # depende del servicio de PHP
     depends_on:
       - php
@@ -119,7 +119,7 @@ services:
     volumes:
       # if you want to check the logs
       - ./logs/varnish:/var/log/
-      - ./conf/varnish-wordpress/varnish.vcl:/etc/varnish/default.vcl:ro
+      - ./conf/varnish-wordpress/varnish-prod.vcl:/etc/varnish/default.vcl:ro
     networks:
       - deploy-nginx_nginx_network
       - default
