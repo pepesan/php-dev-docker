@@ -11,6 +11,7 @@ show_help() {
     echo "                      - prod: Production configuration."
     echo "                      - moodle: Moodle-specific configuration."
     echo "                      - wordpress: Wordpress-specific configuration."
+    echo "                      - wordpress_prod: Wordpress-specific configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
     echo "  start [OPTION]      Start the application with the specified option."
@@ -19,6 +20,7 @@ show_help() {
     echo "                      - prod: Production configuration."
     echo "                      - moodle: Moodle-specific configuration."
     echo "                      - wordpress: Wordpress-specific configuration."
+    echo "                      - wordpress_prod: Wordpress-specific configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
     echo "  stop [OPTION]       Stop the application with the specified option."
@@ -27,6 +29,7 @@ show_help() {
     echo "                      - prod: Production shutdown."
     echo "                      - moodle: Moodle-specific configuration."
     echo "                      - wordpress: Wordpress-specific configuration."
+    echo "                      - wordpress_prod: Wordpress-specific configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
     echo "  clean [OPTION]"
@@ -99,6 +102,36 @@ initialize_wordpress() {
     # Change permissions
     docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
 }
+# Function to initialize the application with Moodle-specific configuration.
+initialize_wordpress_prod() {
+    echo "Initializing the application with Wordpress-specific configuration."
+    mkdir -p wordpress
+    cp src/phpinfo.php ./wordpress/
+    rm -rf src
+    ln -s wordpress src
+    # arranca el entorno
+    start_wordpress
+    # descarga wordpress
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php wp core download --allow-root
+    # configura la bbdd
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core config --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --dbhost=$MYSQL_HOST --allow-root'
+    # Crea al bbdd
+    # docker compose -f docker-compose-wordpress-prod.yaml exec -it php wp db create --allow-root
+    # realiza la instalación
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$SITE_URL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
+    # instalar el idioma
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core install $WP_LANG --allow-root'
+    # Elegir idioma por defecto
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp site switch-language $WP_LANG --allow-root'
+    # Actualizar traducciones de core
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core update --allow-root'
+    # Actualizar plugins instalados
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin update --all --allow-root'
+    # Autoactualizar plugins instalados
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin auto-updates enable --all --allow-root'
+    # Change permissions
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+}
 
 initialize_laravel(){
   echo "Initializing the application with Laravel-specific configuration."
@@ -126,10 +159,15 @@ start_moodle() {
     echo "Starting the application with Moodle-specific configuration."
     docker compose -f docker-compose-moodle.yaml up -d --force-recreate
 }
-# Function to start the application with Moodle-specific configuration.
+# Function to start the application with Wordpress-specific configuration.
 start_wordpress() {
     echo "Starting the application with Wordpress-specific configuration."
     docker compose -f docker-compose-wordpress.yaml up -d --force-recreate
+}
+# Function to start the application with Wordpress-specific configuration.
+start_wordpress_prod() {
+    echo "Starting the application with Wordpress-specific configuration."
+    docker compose -f docker-compose-wordpress-prod.yaml up -d --force-recreate
 }
 
 # Function to start the application with Moodle-specific configuration.
@@ -158,6 +196,10 @@ stop_moodle() {
 stop_wordpress() {
     echo "Stopping the wordpress in development mode."
     docker compose -f docker-compose-wordpress.yaml down
+}
+stop_wordpress_prod() {
+    echo "Stopping the wordpress in development mode."
+    docker compose -f docker-compose-wordpress-prod.yaml down
 }
 
 stop_laravel() {
@@ -349,6 +391,9 @@ case "$1" in
             wordpress)
                 initialize_wordpress
                 ;;
+            wordpress_prod)
+                initialize_wordpress_prod
+                ;;
             moodle)
                 initialize_moodle
                 ;;
@@ -380,6 +425,9 @@ case "$1" in
             wordpress)
                 start_wordpress
                 ;;
+            wordpress_prod)
+                start_wordpress_prod
+                ;;
             laravel)
                 start_laravel
                 ;;
@@ -407,6 +455,9 @@ case "$1" in
                 ;;
             wordpress)
                 stop_wordpress
+                ;;
+            wordpress_prod)
+                stop_wordpress_prod
                 ;;
             laravel)
                 stop_laravel
