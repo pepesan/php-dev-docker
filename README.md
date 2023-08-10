@@ -15,8 +15,9 @@
 - Con el Docker compose: docker compose up -d --force-recreate
 
 # URLS de acceso:
-* Entorno PHP: http://localhost:80 (deberías ver el phpinfo.php)
-* Entorno PHPMyAdmin: http://localhost:8080 (usuario: test/test)
+* Entorno Varnish: http://localhost:80 (deberías ver el phpinfo.php)
+* Entorno Nginx-PHP: http://localhost:81 (deberías ver el phpinfo.php)
+* Entorno PHPMyAdmin: http://localhost:8081 (usuario: test/test)
 
 # Parada del Entorno
 - Usando el comando personalizado:

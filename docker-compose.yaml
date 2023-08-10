@@ -33,7 +33,7 @@ services:
     # aunque el puerto del contenedor es el 80 (derecha)
     # URL: http://localhost:8080
     ports:
-      - 8080:80
+      - 8081:80
     # Variables de entorno
     environment:
       # definición del nombre del host(contenedor) de la BBDD
@@ -68,7 +68,7 @@ services:
     # y en este caso el 80 del contenedor (derecha)
     # url: http://localhost:80/ ó http://localhost
     ports:
-      - 80:80
+      - 81:80
     #links:
     #  - 'php'
 
@@ -90,7 +90,7 @@ services:
     container_name: dev-varnish
     restart: always
     ports:
-      - 81:80
+      - 80:80
     volumes:
       # if you want to check the logs
       - ./logs/varnish:/var/log/
