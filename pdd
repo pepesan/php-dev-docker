@@ -130,9 +130,9 @@ initialize_wordpress_prod() {
     # Autoactualizar plugins instalados
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin auto-updates enable --all --allow-root'
     # Config SiteURL
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl http://localhost:80 --allow-root'
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
     # Config SiteURL
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home http://localhost:80 --allow-root'
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
     # Change permissions
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
 
