@@ -54,12 +54,14 @@ show_help() {
 initialize_development() {
     echo "Initializing the application in development mode."
     # Place the code for initialization in development here.
+    create_logs_dirs
 }
 
 # Function to initialize the application in production mode.
 initialize_production() {
     echo "Initializing the application in production mode."
     # Place the code for initialization in production here.
+    create_logs_dirs
 }
 
 # Function to initialize the application with Moodle-specific configuration.
@@ -70,6 +72,7 @@ initialize_moodle() {
     cp src/phpinfo.php ./moodle/
     rm -rf src
     ln -s moodle src
+    create_logs_dirs
 }
 
 # Function to initialize the application with Moodle-specific configuration.
@@ -79,6 +82,7 @@ initialize_wordpress() {
     cp src/phpinfo.php ./wordpress/
     rm -rf src
     ln -s wordpress src
+    create_logs_dirs
     # arranca el entorno
     start_wordpress
     # descarga wordpress
@@ -88,6 +92,15 @@ initialize_wordpress() {
     # Crea al bbdd
     # docker compose -f docker-compose-wordpress.yaml exec -it php wp db create --allow-root
 }
+
+create_logs_dirs(){
+  mkdir -p logs
+  mkdir -p logs/varnish
+  chmod -R 777 logs/varnish
+}
+delete_logs_dirs(){
+  rm -rf logs
+}
 # Function to initialize the application with Moodle-specific configuration.
 initialize_wordpress_prod() {
     echo "Initializing the application with Wordpress-specific configuration."
@@ -95,6 +108,7 @@ initialize_wordpress_prod() {
     cp src/phpinfo.php ./wordpress/
     rm -rf src
     ln -s wordpress src
+    create_logs_dirs
     # arranca el entorno
     start_wordpress_prod
     # descarga wordpress
@@ -246,6 +260,7 @@ clean_all() {
     clean_source_code
     clean_database
     clean_containers
+    delete_logs_dirs
 }
 
 # Function to clean the database.
