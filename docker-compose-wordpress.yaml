@@ -87,16 +87,13 @@ services:
     # pilla la última imagen de nginx
     image: nginx:latest
     # nombre del contenedor
-    container_name: dev-nginx
+    container_name: wp-nginx
     # user: "1000:1000"
     # ofrece en el puerto 80 en el host (izquierda)
     # y en este caso el 80 del contenedor (derecha)
     # url: http://localhost:80/ ó http://localhost
     ports:
       - 81:80
-    #links:
-    #  - 'php'
-
     volumes:
       # Define el volumen con el código de PHP
       - './src:/var/www/html'

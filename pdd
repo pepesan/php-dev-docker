@@ -217,6 +217,8 @@ stop_moodle() {
 
 stop_wordpress() {
     echo "Stopping the wordpress in development mode."
+    docker container stop wp-nginx
+    docker container rm wp-nginx
     docker compose -f docker-compose-wordpress.yaml down
 }
 stop_wordpress_prod() {
@@ -264,7 +266,7 @@ clean_source_code() {
 }
 clean_containers(){
   echo "Cleaning PHP container image."
-  stop_development
+  stop_wordpress
   docker image rm php-dev-docker-php
   docker image rm php-wordpress
 }
