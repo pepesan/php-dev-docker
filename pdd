@@ -110,7 +110,7 @@ initialize_wordpress_prod() {
     rm -rf src
     ln -s wordpress src
     # arranca el entorno
-    start_wordpress
+    start_wordpress_prod
     # descarga wordpress
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php wp core download --allow-root
     # configura la bbdd
