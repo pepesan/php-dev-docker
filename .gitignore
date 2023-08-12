@@ -5,4 +5,7 @@ wordpress/*
 laravel/*
 logs/*
 
+.env
+
+
 latest-es_ES.tar.gz

@@ -36,8 +36,10 @@ show_help() {
     echo "                      : Execute a command into the selected container."
     echo "                      Available options:"
     echo "                      - all: clean code and database"
+    echo "                      - env: clean code"
     echo "                      - code: clean code"
-    echo "                      - code: clean database data"
+    echo "                      - database: clean database data"
+    echo "                      - containers: clean containers"
     echo "                      - help: Show this help and exit."
     echo "  container [OPTION]  Clean the application with the specified container."
     echo "                      Available options:"
@@ -50,47 +52,54 @@ show_help() {
     echo "  help, -h, --help    Show this help and exit."
 }
 
+copy_env_file(){
+  cp .env.example .env
+}
 # Function to initialize the application in development mode.
 initialize_development() {
-    echo "Initializing the application in development mode."
-    # Place the code for initialization in development here.
-    create_logs_dirs
+  echo "Initializing the application in development mode."
+  # Place the code for initialization in development here.
+  copy_env_file
+  create_logs_dirs
 }
 
 # Function to initialize the application in production mode.
 initialize_production() {
     echo "Initializing the application in production mode."
     # Place the code for initialization in production here.
+    copy_env_file
     create_logs_dirs
 }
 
 # Function to initialize the application with Moodle-specific configuration.
 initialize_moodle() {
-    echo "Initializing the application with Moodle-specific configuration."
-    mkdir -p moodle
-    mkdir -p moodledata
-    cp src/phpinfo.php ./moodle/
-    rm -rf src
-    ln -s moodle src
-    create_logs_dirs
+  echo "Initializing the application with Moodle-specific configuration."
+  copy_env_file
+  mkdir -p moodle
+  mkdir -p moodledata
+  cp src/phpinfo.php ./moodle/
+  rm -rf src
+  ln -s moodle src
+  create_logs_dirs
 }
 
 # Function to initialize the application with Moodle-specific configuration.
 initialize_wordpress() {
-    echo "Initializing the application with Wordpress-specific configuration."
-    mkdir -p wordpress
-    cp src/phpinfo.php ./wordpress/
-    rm -rf src
-    ln -s wordpress src
-    create_logs_dirs
-    # arranca el entorno
-    start_wordpress
-    # descarga wordpress
-    docker compose -f docker-compose-wordpress.yaml exec -it php wp core download --allow-root
-    # configura la bbdd
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp core config --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --dbhost=$MYSQL_HOST --allow-root'
-    # Crea al bbdd
-    # docker compose -f docker-compose-wordpress.yaml exec -it php wp db create --allow-root
+  copy_env_file
+  echo "Initializing the application with Wordpress-specific configuration."
+  mkdir -p wordpress
+  cp src/phpinfo.php ./wordpress/
+  rm -rf src
+  ln -s wordpress src
+  create_logs_dirs
+  # arranca el entorno
+  start_wordpress
+  # descarga wordpress
+  docker compose -f docker-compose-wordpress.yaml exec -it php wp core download --allow-root
+  # configura la bbdd
+  docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'wp core config --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --dbhost=$MYSQL_HOST --allow-root'
+  # Crea al bbdd
+  # docker compose -f docker-compose-wordpress.yaml exec -it php wp db create --allow-root
 }
 
 create_logs_dirs(){
@@ -128,7 +137,7 @@ initialize_laravel(){
 }
 install_wordpress(){
     # realiza la instalación
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$SITE_URL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$WP_SITEURL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
     # instalar el idioma
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core install $WP_LANG --allow-root'
     # Elegir idioma por defecto
@@ -140,16 +149,16 @@ install_wordpress(){
     # Autoactualizar plugins instalados
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin auto-updates enable --all --allow-root'
     # Config SiteURL
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
+    # docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
     # Config SiteURL
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
+    # docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
     # Change permissions
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
 }
 
 install_wordpress_prod(){
     # realiza la instalación
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$SITE_URL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$$WP_SITEURL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
     # instalar el idioma
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core install $WP_LANG --allow-root'
     # Elegir idioma por defecto
@@ -163,9 +172,9 @@ install_wordpress_prod(){
     # Config SiteURL
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
     # Config SiteURL
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
+    # docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
     # Change permissions
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+    # docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
 }
 show_install_help(){
     # Display help for the 'container' command.
@@ -257,10 +266,15 @@ show_clean_help(){
 # Function to clean everything.
 clean_all() {
     echo "Cleaning everything: development, production, and Moodle."
+    clean_env_file
     clean_source_code
     clean_database
     clean_containers
     delete_logs_dirs
+}
+
+clean_env_file(){
+  rm .env
 }
 
 # Function to clean the database.
@@ -412,6 +426,13 @@ ls_container(){
   docker compose ps
 }
 
+ENV_FILE=".env"
+if [ -f "$ENV_FILE" ]; then
+    echo "Cargando el archivo $ENV_FILE..."
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+fi
+
 # Check if the script was invoked with no arguments or with the help option.
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     show_help
@@ -517,6 +538,9 @@ case "$1" in
         case "$2" in
             all)
                 clean_all
+                ;;
+            env)
+                clean_env_file
                 ;;
             database)
                 clean_database
