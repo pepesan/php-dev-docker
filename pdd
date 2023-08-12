@@ -7,28 +7,31 @@ show_help() {
     echo "Available commands:"
     echo "  init [OPTION]       Initialize the application with the specified option."
     echo "                      Available options:"
+    echo "                      - default: Default configuration."
     echo "                      - dev: Development configuration."
     echo "                      - prod: Production configuration."
     echo "                      - moodle: Moodle-specific configuration."
-    echo "                      - wordpress: Wordpress-specific configuration."
-    echo "                      - wordpress_prod: Wordpress-specific configuration."
+    echo "                      - wordpress: Wordpress-specific development configuration."
+    echo "                      - wordpress_prod: Wordpress-specific production configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
     echo "  start [OPTION]      Start the application with the specified option."
     echo "                      Available options:"
+    echo "                      - default: Default configuration."
     echo "                      - dev: Development configuration."
     echo "                      - prod: Production configuration."
     echo "                      - moodle: Moodle-specific configuration."
-    echo "                      - wordpress: Wordpress-specific configuration."
+    echo "                      - wordpress: Wordpress-specific development configuration."
     echo "                      - wordpress_prod: Wordpress-specific configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
     echo "  stop [OPTION]       Stop the application with the specified option."
     echo "                      Available options:"
+    echo "                      - default: Default configuration."
     echo "                      - dev: Development shutdown."
     echo "                      - prod: Production shutdown."
     echo "                      - moodle: Moodle-specific configuration."
-    echo "                      - wordpress: Wordpress-specific configuration."
+    echo "                      - wordpress: Wordpress-specific development configuration."
     echo "                      - wordpress_prod: Wordpress-specific configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
@@ -64,6 +67,14 @@ create_logs_dirs(){
 delete_logs_dirs(){
   rm -rf logs
 }
+# Function to initialize the application in development mode.
+initialize_default() {
+  echo "Initializing the application in development mode."
+  # Place the code for initialization in development here.
+  copy_env_file
+  create_logs_dirs
+}
+
 
 # Function to initialize the application in development mode.
 initialize_development() {
@@ -196,11 +207,17 @@ show_install_help(){
     echo "  wordpress_prod       Install wordpress into the container."
 }
 
+# Function to start the application in development mode.
+start_default() {
+    echo "Starting the application in development mode."
+    docker compose up -d --force-recreate
+}
+
 
 # Function to start the application in development mode.
 start_development() {
     echo "Starting the application in development mode."
-    docker compose up -d --force-recreate
+    docker compose up -f docker-compose-dev.yaml -d --force-recreate
 }
 
 # Function to start the application in production mode.
@@ -232,9 +249,15 @@ start_laravel() {
 }
 
 # Function to stop the application in development mode.
-stop_development() {
+stop_default() {
     echo "Stopping the application in development mode."
     docker compose down
+}
+
+# Function to stop the application in development mode.
+stop_development() {
+    echo "Stopping the application in development mode."
+    docker compose -f docker-compose-dev.yaml down
 }
 
 # Function to stop the application in production mode.
@@ -473,7 +496,7 @@ case "$1" in
                 ;;
             "")
                 # If no option is provided, use 'dev' by default.
-                initialize_development
+                initialize_default
                 ;;
             *)
                 echo "Invalid option for 'init' command."
@@ -504,7 +527,7 @@ case "$1" in
                 ;;
             "")
                 # If no option is provided, use 'dev' by default.
-                start_development
+                start_default
                 ;;
             *)
                 echo "Invalid option for 'start' command."
@@ -535,7 +558,7 @@ case "$1" in
                 ;;
             "")
                 # If no option is provided, use 'dev' by default.
-                stop_development
+                stop_default
                 ;;
             *)
                 echo "Invalid option for 'stop' command."

@@ -1,0 +1,85 @@
+version: '3.8'
+
+# Services
+services:
+
+  # MariaDB Service
+  db:
+    # imagen de mariadb
+    image: mariadb:11.0.2-jammy
+    # nombre del contenedor
+    container_name: dev-mariadb
+    # variables de entorno
+    environment:
+      # contraseña de root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # nombre de la BBDD
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      # usuario de acceso a la BBDD
+      MYSQL_USER: ${MYSQL_USER}
+      # contraseña de acceso a ls BBDD
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    # Volumen con los datos de la BBDD
+    volumes:
+      - ./db-data:/var/lib/mysql
+  # PHP Service
+  php:
+    # pilla el fichero Dockerfile para crear la imagen
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    # nombre del contenedor PHP
+    container_name: dev-php
+    # definición del volumen con el código PHP
+    volumes:
+      - './src:/var/www/html'
+      - './conf/php/php.ini:/usr/local/etc/php/php.ini'
+    environment:
+      # host de mysql
+      MYSQL_HOST: ${MYSQL_HOST}
+      # port de mysql
+      MYSQL_PORT: ${MYSQL_PORT}
+      # contraseña de root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # nombre de la BBDD
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      # usuario de acceso a la BBDD
+      MYSQL_USER: ${MYSQL_USER}
+      # contraseña de acceso a ls BBDD
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    # dependencia del contenedor mariadb
+    depends_on:
+      - db
+
+  # Nginx Service
+  nginx-dev:
+    # pilla la última imagen de nginx
+    image: nginx:latest
+    # nombre del contenedor
+    container_name: dev-nginx
+    # user: "1000:1000"
+    # ofrece en el puerto 80 en el host (izquierda)
+    # y en este caso el 80 del contenedor (derecha)
+    # url: http://localhost:80/ ó http://localhost
+    ports:
+      - 81:80
+    networks:
+      - deploy-nginx_nginx_network
+      - default
+    volumes:
+      # Define el volumen con el código de PHP
+      - './src:/var/www/html'
+      - './logs/nginx:/var/log/nginx'
+      # define el volumen con los ficheros de configuración
+      # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
+      - './conf/nginx-moodle:/etc/nginx/conf.d'
+    # depende del servicio de PHP
+    depends_on:
+      - php
+
+networks:
+  deploy-nginx_nginx_network:
+    external: true
+
+
+
