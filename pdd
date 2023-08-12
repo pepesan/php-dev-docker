@@ -158,7 +158,7 @@ install_wordpress(){
 
 install_wordpress_prod(){
     # realiza la instalación
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$$WP_SITEURL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
+    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp core install --url=$WP_SITEURL --title="$SITE_TITLE" --admin_user=$ADMIN_USER --admin_password=$ADMIN_PASSWORD --admin_email=$ADMIN_EMAIL  --allow-root'
     # instalar el idioma
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp language core install $WP_LANG --allow-root'
     # Elegir idioma por defecto
@@ -170,7 +170,7 @@ install_wordpress_prod(){
     # Autoactualizar plugins instalados
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp plugin auto-updates enable --all --allow-root'
     # Config SiteURL
-    docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
+    # docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update siteurl $WP_SITEURL --allow-root'
     # Config SiteURL
     # docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
     # Change permissions
