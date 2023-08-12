@@ -52,7 +52,7 @@ services:
       - db
 
   # Nginx Service
-  nginx:
+  nginx-prod:
     # pilla la última imagen de nginx
     image: nginx:latest
     # nombre del contenedor
@@ -63,9 +63,9 @@ services:
     # url: http://localhost:80/ ó http://localhost
     ports:
       - 81:80
-    #links:
-    #  - 'php'
-
+    networks:
+      - deploy-nginx_nginx_network
+      - default
     volumes:
       # Define el volumen con el código de PHP
       - './src:/var/www/html'
@@ -77,6 +77,9 @@ services:
     depends_on:
       - php
 
+networks:
+  deploy-nginx_nginx_network:
+    external: true
 
 
 
