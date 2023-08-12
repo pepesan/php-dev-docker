@@ -53,32 +53,33 @@ services:
     volumes:
       - './src:/var/www/html'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
-    # dependencia del contenedor mariadb
+    # Definición de variables de entorno del .env -> contenedor
     environment:
       # host de mysql
-      MYSQL_HOST: db
+      MYSQL_HOST: ${MYSQL_HOST}
       # port de mysql
-      MYSQL_PORT: 3306
+      MYSQL_PORT: ${MYSQL_PORT}
       # contraseña de root
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       # nombre de la BBDD
-      MYSQL_DATABASE: test
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
       # usuario de acceso a la BBDD
-      MYSQL_USER: test
+      MYSQL_USER: ${MYSQL_USER}
       # contraseña de acceso a ls BBDD
-      MYSQL_PASSWORD: test
-      # ruta del servicio
-      SITE_URL: http://localhost
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       # Título del sitio
-      SITE_TITLE: "Mi Sitio WordPress"
+      SITE_TITLE: ${SITE_TITLE}
       # Admin user
-      ADMIN_USER: admin
+      ADMIN_USER: ${ADMIN_USER}
       # Admin password
-      ADMIN_PASSWORD: admin
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       # Admin email
-      ADMIN_EMAIL: admin@example.com
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
       # Language to Install
-      WP_LANG: es_ES
+      WP_LANG: ${WP_LANG}
+      # Site base url
+      WP_SITEURL: ${WP_SITEURL}
+    # dependencia del contenedor mariadb
     depends_on:
       - db
 
