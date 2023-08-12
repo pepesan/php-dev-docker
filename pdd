@@ -427,12 +427,12 @@ ls_container(){
 }
 
 ENV_FILE=".env"
-if [ -f "$ENV_FILE" ]; then
-    echo "Cargando el archivo $ENV_FILE..."
-    # shellcheck disable=SC1090
-    source "$ENV_FILE"
+if [ ! -f "$ENV_FILE" ]; then
+    echo "El archivo $ENV_FILE no existe."
+    cp .env.example .env
 fi
-
+# carga el fichero .env
+source "$ENV_FILE"
 # Check if the script was invoked with no arguments or with the help option.
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     show_help
