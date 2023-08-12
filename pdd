@@ -217,7 +217,7 @@ start_default() {
 # Function to start the application in development mode.
 start_development() {
     echo "Starting the application in development mode."
-    docker compose up -f docker-compose-dev.yaml -d --force-recreate
+    docker compose -f docker-compose-dev.yaml up -d --force-recreate
 }
 
 # Function to start the application in production mode.
