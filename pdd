@@ -271,7 +271,7 @@ show_clean_help(){
 # Function to clean everything.
 clean_all() {
     echo "Cleaning everything: development, production, and Moodle."
-    clean_env_file
+    #clean_env_file
     clean_source_code
     clean_database
     clean_containers
