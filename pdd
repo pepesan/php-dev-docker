@@ -55,6 +55,16 @@ show_help() {
 copy_env_file(){
   cp .env.example .env
 }
+
+create_logs_dirs(){
+  mkdir -p logs
+  mkdir -p logs/varnish
+  chmod -R 777 logs/varnish
+}
+delete_logs_dirs(){
+  rm -rf logs
+}
+
 # Function to initialize the application in development mode.
 initialize_development() {
   echo "Initializing the application in development mode."
@@ -102,14 +112,7 @@ initialize_wordpress() {
   # docker compose -f docker-compose-wordpress.yaml exec -it php wp db create --allow-root
 }
 
-create_logs_dirs(){
-  mkdir -p logs
-  mkdir -p logs/varnish
-  chmod -R 777 logs/varnish
-}
-delete_logs_dirs(){
-  rm -rf logs
-}
+
 # Function to initialize the application with Moodle-specific configuration.
 initialize_wordpress_prod() {
     echo "Initializing the application with Wordpress-specific configuration."
@@ -135,6 +138,8 @@ initialize_laravel(){
   docker compose -f docker-compose-laravel.yaml exec -it php sh -c "chown -R www-data:www-data /var/www/html"
   echo "Now you have composer and laravel command intro the container and available into the PATH"
 }
+
+
 install_wordpress(){
     # Change permissions
     docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
