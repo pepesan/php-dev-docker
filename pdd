@@ -35,6 +35,16 @@ show_help() {
     echo "                      - wordpress_prod: Wordpress-specific configuration."
     echo "                      - laravel: Laravel-specific configuration."
     echo "                      If no option is provided, 'dev' will be used by default."
+    echo "  status [OPTION]       Stop the application with the specified option."
+    echo "                      Available options:"
+    echo "                      - default: Default configuration."
+    echo "                      - dev: Development status."
+    echo "                      - prod: Production status."
+    echo "                      - moodle: Moodle-specific configuration."
+    echo "                      - wordpress: Wordpress-specific development configuration."
+    echo "                      - wordpress_prod: Wordpress-specific configuration."
+    echo "                      - laravel: Laravel-specific configuration."
+    echo "                      If no option is provided, 'dev' will be used by default."
     echo "  clean [OPTION]"
     echo "                      : Execute a command into the selected container."
     echo "                      Available options:"
@@ -285,6 +295,58 @@ stop_wordpress_prod() {
 stop_laravel() {
     echo "Stopping the application in laravel mode."
     docker compose -f docker-compose-laravel.yaml down
+}
+
+# Function to stop the application in development mode.
+status_default() {
+    echo "Status the application in development mode."
+    docker compose ps
+}
+
+# Function to status the application in development mode.
+status_development() {
+    echo "Status the application in development mode."
+    docker compose -f docker-compose-dev.yaml ps
+}
+
+# Function to status the application in production mode.
+status_production() {
+    echo "Status the application in production mode."
+    docker compose -f docker-compose-prod.yaml ps
+}
+
+status_moodle() {
+    echo "Status the moodle in development mode."
+    docker compose -f docker-compose-moodle.yaml ps
+}
+
+status_wordpress() {
+    echo "Status the wordpress in development mode."
+    docker compose -f docker-compose-wordpress.yaml ps
+}
+status_wordpress_prod() {
+    echo "Status the wordpress in development mode."
+    docker compose -f docker-compose-wordpress-prod.yaml ps
+}
+
+status_laravel() {
+    echo "Status the application in laravel mode."
+    docker compose -f docker-compose-laravel.yaml ps
+}
+
+status_show_help(){
+    # Display help for the 'container' command.
+    echo "Usage: $0 status [COMMAND]"
+    echo
+    echo "Available commands:"
+    echo "  dev             Development status."
+    echo "  prod            Production status."
+    echo "  moodle          moodle: Moodle-specific configuration."
+    echo "  wordpress       Wordpress-specific development configuration."
+    echo "  wordpress_prod  wordpress_prod: Wordpress-specific configuration."
+    echo "  laravel         Laravel-specific configuration."
+    echo "  help            Show this help and exit."
+    echo "  If no option is provided, 'dev' will be used by default."
 }
 show_clean_help(){
     # Display help for the 'container' command.
@@ -565,6 +627,37 @@ case "$1" in
                 show_help
                 exit 1
                 ;;
+        esac
+        ;;
+    status)
+      case "$2" in
+        dev)
+          status_development
+          ;;
+        prod)
+          status_production
+          ;;
+          moodle)
+          status_moodle
+          ;;
+        wordpress)
+          status_wordpress
+          ;;
+          wordpress_prod)
+          status_wordpress_prod
+          ;;
+        laravel)
+          status_laravel
+          ;;
+        "")
+          # If no option is provided, use 'dev' by default.
+          status_default
+          ;;
+        *)
+          echo "Invalid option for 'start' command."
+          status_show_help
+          exit 1
+          ;;
         esac
         ;;
     clean)

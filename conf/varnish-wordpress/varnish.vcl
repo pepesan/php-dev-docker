@@ -26,7 +26,7 @@ import std;
 
 # Default backend definition. Set this to point to your content server.
 backend default {
-    .host = "wp-nginx"; # UPDATE this only if the web server is not on the same machine
+    .host = "nginx"; # UPDATE this only if the web server is not on the same machine
     .port = "80";      # UPDATE 8080 with your web server's (internal) port
 }
 
