@@ -205,6 +205,8 @@ install_wordpress_prod(){
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'wp option update home $WP_SITEURL --allow-root'
     # Change permissions
     docker compose -f docker-compose-wordpress-prod.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+    # change access to https wordpress
+    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c "sed -i 's/require_once ABSPATH \. '\''wp-settings\.php'\'';/define('\''FORCE_SSL_ADMIN'\'', true);\\n\\nif( strpos(\$_SERVER['\''HTTP_X_FORWARDED_PROTO'\''], '\''https'\'') !== false )\\n    \$_SERVER['\''HTTPS'\''] = '\''on'\'';\\nelse\\n    \$_SERVER['\''HTTPS'\''] = '\''off'\'';\\n\\/\\*\\* Sets up WordPress vars and included files. \\*\\/\nrequire_once ABSPATH \. '\''wp-settings\.php'\'';/' \"wp-config.php\""
 
 }
 show_install_help(){
@@ -671,7 +673,7 @@ case "$1" in
             database)
                 clean_database
                 ;;
-            src)
+            code)
                 clean_source_code
                 ;;
             containers)
