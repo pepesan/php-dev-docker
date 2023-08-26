@@ -54,6 +54,7 @@ services:
       - './src:/var/www/html'
       - './logs/php-fpm:/var/www/logs'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
+      - './conf/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf'
     # dependencia del contenedor mariadb
     environment:
       # host de mysql

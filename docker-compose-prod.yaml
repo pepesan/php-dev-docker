@@ -34,6 +34,7 @@ services:
     volumes:
       - './src:/var/www/html'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
+      - './conf/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf'
     environment:
       # host de mysql
       MYSQL_HOST: ${MYSQL_HOST}
