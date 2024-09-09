@@ -1,5 +1,5 @@
 # Elegimos la versión de PHP8.1 con Debian Bulleye como base
-FROM php:8.1-fpm-bullseye
+FROM php:8.3-fpm-bookworm
 ARG UNAME=www-data
 ARG UGROUP=www-data
 ARG UID=1000
