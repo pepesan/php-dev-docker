@@ -1,5 +1,5 @@
-# Elegimos la versión de PHP8.1 con Debian Bulleye como base
-FROM php:8.3-fpm-bookworm
+# Elegimos la versión de PHP8.4 con Debian Trixie como base
+FROM php:8.4-fpm-trixie
 ARG UNAME=www-data
 ARG UGROUP=www-data
 ARG UID=1000
@@ -9,13 +9,24 @@ RUN usermod  --uid $UID $UNAME
 RUN groupmod --gid $GID $UGROUP
 
 # Installing dependencies for the PHP modules
-RUN apt-get update && \
-apt-get install -y zip libzip-dev libpng-dev libfreetype-dev libjpeg62-turbo-dev unzip wget
+RUN apt-get update && apt-get install -y \
+    zip \
+    libzip-dev \
+    libpng-dev \
+    libfreetype-dev \
+    libjpeg62-turbo-dev \
+    unzip \
+    wget \
+    libcurl4-openssl-dev \
+    libxml2-dev \
+    libicu-dev \
+    pkg-config \
+ && rm -rf /var/lib/apt/lists/*
 
 # Installing initial PHP extensions
 RUN docker-php-ext-install gd
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql gd zip
+RUN docker-php-ext-install mysqli pdo pdo_mysql zip
 
 # Installing curl extension
 RUN apt-get install -y libcurl4-openssl-dev

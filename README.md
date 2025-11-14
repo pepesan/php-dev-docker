@@ -11,8 +11,15 @@
 ```
 
 # Lanzamiento del Entorno
-- Usando el comando personalizado: ./pvd.sh start
-- Con el Docker compose: docker compose up -d --force-recreate
+- Usando el comando personalizado: 
+```shell
+./pdd.sh start
+```
+
+- Con el Docker compose:
+```shell
+docker compose up -d --force-recreate
+```
 
 # URLS de acceso:
 * Entorno Varnish: http://localhost:80 (deberías ver el phpinfo.php)

@@ -27,9 +27,9 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     # nombre del contenedor
     container_name: dev-phpmyadmin
-    # accedemos al puerto 8080 local (host) (izquierda)
+    # accedemos al puerto 8081 local (host) (izquierda)
     # aunque el puerto del contenedor es el 80 (derecha)
-    # URL: http://localhost:8080
+    # URL: http://localhost:8081
     ports:
       - 8081:80
     # Variables de entorno
@@ -62,9 +62,9 @@ services:
     # nombre del contenedor
     container_name: dev-nginx
     # user: "1000:1000"
-    # ofrece en el puerto 80 en el host (izquierda)
-    # y en este caso el 80 del contenedor (derecha)
-    # url: http://localhost:80/ ó http://localhost
+    # ofrece en el puerto 81 en el host (izquierda)
+    # y en este caso el 81 del contenedor (derecha)
+    # url: http://localhost:81/ ó http://localhost
     ports:
       - 81:80
     #links:
