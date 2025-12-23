@@ -47,6 +47,8 @@ services:
       dockerfile: Dockerfile
     # nombre del contenedor PHP
     container_name: dev-php
+    env_file:
+      - .env
     # definición del volumen con el código PHP
     volumes:
       - './src:/var/www/html'

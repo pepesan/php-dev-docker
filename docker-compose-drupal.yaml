@@ -27,9 +27,9 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     # nombre del contenedor
     container_name: dev-phpmyadmin
-    # accedemos al puerto 8080 local (host) (izquierda)
+    # accedemos al puerto 8081 local (host) (izquierda)
     # aunque el puerto del contenedor es el 80 (derecha)
-    # URL: http://localhost:8080
+    # URL: http://localhost:8081
     ports:
       - 8081:80
     # Variables de entorno
@@ -44,62 +44,41 @@ services:
     # pilla el fichero Dockerfile para crear la imagen
     build:
       context: .
-      dockerfile: Dockerfile.wordpress
+      dockerfile: Dockerfile.drupal
     # nombre del contenedor PHP
     container_name: dev-php
+    env_file:
+      - .env
     # definición del volumen con el código PHP
     volumes:
       - './src:/var/www/html'
       - './conf/php/php.ini:/usr/local/etc/php/php.ini'
-    # Definición de variables de entorno del .env -> contenedor
-    environment:
-      # host de mysql
-      MYSQL_HOST: ${MYSQL_HOST}
-      # port de mysql
-      MYSQL_PORT: ${MYSQL_PORT}
-      # contraseña de root
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      # nombre de la BBDD
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      # usuario de acceso a la BBDD
-      MYSQL_USER: ${MYSQL_USER}
-      # contraseña de acceso a ls BBDD
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      # Título del sitio
-      SITE_TITLE: ${SITE_TITLE}
-      # Admin user
-      ADMIN_USER: ${ADMIN_USER}
-      # Admin password
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      # Admin email
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      # Language to Install
-      WP_LANG: ${WP_LANG}
-      # Site base url
-      WP_SITEURL: ${WP_SITEURL}
     # dependencia del contenedor mariadb
     depends_on:
       - db
 
   # Nginx Service
-  wp-nginx:
+  nginx:
     # pilla la última imagen de nginx
     image: nginx:latest
     # nombre del contenedor
-    container_name: wp-nginx
+    container_name: dev-nginx
     # user: "1000:1000"
-    # ofrece en el puerto 80 en el host (izquierda)
-    # y en este caso el 80 del contenedor (derecha)
-    # url: http://localhost:80/ ó http://localhost
+    # ofrece en el puerto 81 en el host (izquierda)
+    # y en este caso el 81 del contenedor (derecha)
+    # url: http://localhost:81/ ó http://localhost
     ports:
       - 81:80
+    #links:
+    #  - 'php'
+
     volumes:
       # Define el volumen con el código de PHP
       - './src:/var/www/html'
       - './logs/nginx:/var/log/nginx'
       # define el volumen con los ficheros de configuración
       # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
-      - './conf/nginx-wordpress:/etc/nginx/conf.d'
+      - './conf/nginx-drupal:/etc/nginx/conf.d'
     # depende del servicio de PHP
     depends_on:
       - php
@@ -107,7 +86,7 @@ services:
   varnish:
     image: varnish:fresh
     depends_on:
-      - wp-nginx
+      - nginx
     container_name: dev-varnish
     restart: always
     ports:
@@ -115,15 +94,14 @@ services:
     volumes:
       # if you want to check the logs
       - ./logs/varnish:/var/log/
-      - ./conf/varnish-wordpress/varnish.vcl:/etc/varnish/default.vcl:ro
+      - ./conf/varnish-drupal/varnish.vcl:/etc/varnish/default.vcl:ro
     environment:
-      BACKENDS: "wp-nginx"
+      BACKENDS: "nginx"
       BACKENDS_PORT: 80
       BACKENDS_PROBE_ENABLED: "false"
     logging:
       options:
         max-size: 10m
-
 
 
 

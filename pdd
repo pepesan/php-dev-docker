@@ -75,7 +75,7 @@ create_logs_dirs(){
   chmod -R 777 logs/varnish
 }
 delete_logs_dirs(){
-  rm -rf logs
+  sudo rm -rf logs
 }
 # Function to initialize the application in development mode.
 initialize_default() {
@@ -151,6 +151,18 @@ initialize_wordpress_prod() {
     # Crea al bbdd
     # docker compose -f docker-compose-wordpress-prod.yaml exec -it php wp db create --allow-root
 }
+
+# Function to initialize the application with Drupal-specific configuration.
+initialize_drupal() {
+  copy_env_file
+  echo "Initializing the application with Drupal-specific configuration."
+
+  create_logs_dirs
+
+  # Arranca el entorno (define tú start_drupal como start_wordpress pero con el compose de drupal)
+  start_drupal
+}
+
 initialize_laravel(){
   echo "Initializing the application with Laravel-specific configuration."
   start_laravel
@@ -209,6 +221,50 @@ install_wordpress_prod(){
     docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c "sed -i 's/require_once ABSPATH \. '\''wp-settings\.php'\'';/define('\''FORCE_SSL_ADMIN'\'', true);\\n\\nif( strpos(\$_SERVER['\''HTTP_X_FORWARDED_PROTO'\''], '\''https'\'') !== false )\\n    \$_SERVER['\''HTTPS'\''] = '\''on'\'';\\nelse\\n    \$_SERVER['\''HTTPS'\''] = '\''off'\'';\\n\\/\\*\\* Sets up WordPress vars and included files. \\*\\/\nrequire_once ABSPATH \. '\''wp-settings\.php'\'';/' \"wp-config.php\""
 
 }
+
+install_drupal(){
+    rm ./src/phpinfo.php
+    # Change permissions
+    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+    # realiza la instalación
+      # 1) Crear el proyecto Drupal dentro de /var/www/html/src
+      #    Esto genera /var/www/html/src/web como docroot.
+      docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -lc '
+        set -e
+        cd /var/www/html
+
+        # Si ya había algo de una instalación anterior, límpialo (opcional)
+        # rm -rf vendor web core modules themes profiles sites composer.lock
+
+        composer create-project drupal/recommended-project .
+      '
+
+      # 2) Instalar Drush (para poder hacer site:install sin navegador)
+      docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -lc '
+        set -e
+        cd /var/www/html
+        composer require drush/drush
+      '
+
+      # 3) Instalar el sitio usando variables de entorno de MySQL/MariaDB (como haces en WordPress)
+      #    Necesitas que en tu .env existan: MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST
+      docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -lc '
+        set -e
+        cd /var/www/html
+
+        DB_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:3306/${MYSQL_DATABASE}"
+
+        ./vendor/bin/drush -y site:install standard \
+          --db-url="${DB_URL}" \
+          --site-name="Drupal" \
+          --account-name=admin \
+          --account-pass="admin"
+      '
+
+      echo "Drupal installed. Make sure Nginx docroot points to /var/www/html/web"
+    # Change permissions
+    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+}
 show_install_help(){
     # Display help for the 'container' command.
     echo "Usage: $0 install [COMMAND]"
@@ -254,6 +310,12 @@ start_wordpress_prod() {
     docker compose -f docker-compose-wordpress-prod.yaml up -d --force-recreate
 }
 
+# Function to start the application with Wordpress-specific configuration.
+start_drupal() {
+    echo "Starting the application with Wordpress-specific configuration."
+    docker compose -f docker-compose-drupal.yaml up -d --force-recreate
+}
+
 # Function to start the application with Moodle-specific configuration.
 start_laravel() {
     echo "Starting the application with Moodle-specific configuration."
@@ -293,6 +355,12 @@ stop_wordpress_prod() {
     echo "Stopping the wordpress in development mode."
     docker compose -f docker-compose-wordpress-prod.yaml down
 }
+stop_drupal() {
+    echo "Stopping the wordpress in development mode."
+    docker container stop dev-nginx
+    docker container rm dev-nginx
+    docker compose -f docker-compose-drupal.yaml down
+}
 
 stop_laravel() {
     echo "Stopping the application in laravel mode."
@@ -329,6 +397,11 @@ status_wordpress() {
 status_wordpress_prod() {
     echo "Status the wordpress in development mode."
     docker compose -f docker-compose-wordpress-prod.yaml ps
+}
+
+status_drupal() {
+    echo "Status the drupal in development mode."
+    docker compose -f docker-compose-drupal.yaml ps
 }
 
 status_laravel() {
@@ -555,6 +628,9 @@ case "$1" in
             moodle)
                 initialize_moodle
                 ;;
+            drupal)
+                initialize_drupal
+                ;;
             laravel)
                 initialize_laravel
                 ;;
@@ -586,6 +662,9 @@ case "$1" in
             wordpress_prod)
                 start_wordpress_prod
                 ;;
+            drupal)
+              start_drupal
+              ;;
             laravel)
                 start_laravel
                 ;;
@@ -617,6 +696,9 @@ case "$1" in
             wordpress_prod)
                 stop_wordpress_prod
                 ;;
+            drupal)
+              stop_drupal
+              ;;
             laravel)
                 stop_laravel
                 ;;
@@ -647,6 +729,9 @@ case "$1" in
           ;;
           wordpress_prod)
           status_wordpress_prod
+          ;;
+        drupal)
+          status_drupal
           ;;
         laravel)
           status_laravel
@@ -748,6 +833,10 @@ case "$1" in
           ;;
         wordpress_prod)
           install_wordpress_prod
+          exit 0
+          ;;
+        drupal)
+          install_drupal
           exit 0
           ;;
         help)

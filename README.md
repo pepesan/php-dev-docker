@@ -69,8 +69,19 @@ un poco más que el resto de veces
   - database name: test
   - username: test
   - password: test
-- Si necesitas cambiar estos valores vete al fichero docker-compose-moodle.yaml
+- Si necesitas cambiar estos valores vete al fichero docker-compose-wordpress.yaml
 
+## Entorno Drupal
+```shell
+./pdd init drupal # esto monta el contenedor
+```
+```shell
+./pdd install drupal # esto monta el contenedor
+```
+- Accede a http://localhost:81/
+- user/password: admin/admin
+- Si necesitas cambiar estos valores vete al fichero docker-compose-drupal.yaml
+- El fichero de Dockerfile asociado es: Dockerfile.drupal
 ## Entorno Moodle
 ```shell
 ./pdd init moodle # esto crea un enlace a la carpeta moodle desde src
