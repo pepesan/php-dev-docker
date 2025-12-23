@@ -263,7 +263,7 @@ install_drupal(){
 
       echo "Drupal installed. Make sure Nginx docroot points to /var/www/html/web"
     # Change permissions
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+    docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
 }
 show_install_help(){
     # Display help for the 'container' command.
@@ -310,9 +310,9 @@ start_wordpress_prod() {
     docker compose -f docker-compose-wordpress-prod.yaml up -d --force-recreate
 }
 
-# Function to start the application with Wordpress-specific configuration.
+# Function to start the application with Drupal-specific configuration.
 start_drupal() {
-    echo "Starting the application with Wordpress-specific configuration."
+    echo "Starting the application with Drupal-specific configuration."
     docker compose -f docker-compose-drupal.yaml up -d --force-recreate
 }
 
@@ -356,7 +356,7 @@ stop_wordpress_prod() {
     docker compose -f docker-compose-wordpress-prod.yaml down
 }
 stop_drupal() {
-    echo "Stopping the wordpress in development mode."
+    echo "Stopping the drupal in development mode."
     docker container stop dev-nginx
     docker container rm dev-nginx
     docker compose -f docker-compose-drupal.yaml down
