@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype-dev \
     libjpeg62-turbo-dev \
     libwebp-dev \
+    libavif-dev \
     unzip \
     wget \
     libcurl4-openssl-dev \
@@ -23,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     pkg-config \
     git \
+    nano \
  && rm -rf /var/lib/apt/lists/*
 
 # GD con soporte JPEG, FreeType y WebP
@@ -30,6 +32,7 @@ RUN docker-php-ext-configure gd \
     --with-freetype \
     --with-jpeg \
     --with-webp \
+    --with-avif \
  && docker-php-ext-install gd
 
 # Resto de extensiones

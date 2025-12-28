@@ -244,6 +244,7 @@ install_drupal(){
         set -e
         cd /var/www/html
         composer require drush/drush
+        echo 'export PATH=$PATH:/var/www/html/vendor/bin' >> /root/.bashrc
       '
 
       # 3) Instalar el sitio usando variables de entorno de MySQL/MariaDB (como haces en WordPress)
