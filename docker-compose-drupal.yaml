@@ -52,6 +52,7 @@ services:
     # definición del volumen con el código PHP
     volumes:
       - './src:/var/www/html'
+      - './conf/php/.bashrc:/root/.bashrc'
       - './conf/php/php-drupal.ini:/usr/local/etc/php/php.ini'
     # dependencia del contenedor mariadb
     depends_on:
