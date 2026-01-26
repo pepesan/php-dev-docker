@@ -258,8 +258,8 @@ install_drupal(){
         ./vendor/bin/drush -y site:install standard \
           --db-url="${DB_URL}" \
           --site-name="Drupal" \
-          --account-name=admin \
-          --account-pass="admin"
+          --account-name=${ADMIN_USER} \
+          --account-pass=${ADMIN_PASSWORD}
       '
 
       echo "Drupal installed. Make sure Nginx docroot points to /var/www/html/web"
@@ -470,7 +470,7 @@ clean_containers(){
   docker image rm php-dev-docker-php
   docker image rm php-wordpress
   docker image rm -f dev-php
-  docker image rm -f dev-nginx
+  docker rm -f dev-nginx
 }
 
 run_inside_docker() {
