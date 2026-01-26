@@ -1,4 +1,4 @@
-# Elegimos la versión de PHP8.4 con Debian Trixie como base
+# Elegimos la versión de PHP8.5 con Debian Trixie como base
 FROM php:8.5-fpm-trixie
 ARG UNAME=www-data
 ARG UGROUP=www-data
