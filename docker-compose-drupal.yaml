@@ -54,9 +54,12 @@ services:
       - './src:/var/www/html'
       - './conf/php/.bashrc:/root/.bashrc'
       - './conf/php/php-drupal.ini:/usr/local/etc/php/php.ini'
+      - './conf/php/99-xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini:ro'
     # dependencia del contenedor mariadb
     depends_on:
       - db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # Nginx Service
   nginx:

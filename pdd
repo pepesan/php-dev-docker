@@ -225,7 +225,7 @@ install_wordpress_prod(){
 install_drupal(){
     rm ./src/phpinfo.php
     # Change permissions
-    docker compose -f docker-compose-wordpress.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
+    docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
     # realiza la instalación
       # 1) Crear el proyecto Drupal dentro de /var/www/html/src
       #    Esto genera /var/www/html/src/web como docroot.
@@ -469,6 +469,7 @@ clean_containers(){
   stop_wordpress
   docker image rm php-dev-docker-php
   docker image rm php-wordpress
+  docker image rm -f dev-php
 }
 
 run_inside_docker() {

@@ -82,7 +82,11 @@ sub vcl_recv {
         req.url ~ "^/cart" ||
         req.url ~ "^/checkout" ||
         req.url ~ "^/user/login" ||
-        req.url ~ "^/user/logout"
+        req.url ~ "^/user/logout" ||
+        req.url ~ "^/profiler" ||
+        req.url ~ "^/profiler/" ||
+        req.url ~ "^/admin/reports/profiler" ||
+        req.url ~ "^/admin/reports/profiler/"
     ) {
         return (pass);
     }
