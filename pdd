@@ -223,7 +223,7 @@ install_wordpress_prod(){
 }
 
 install_drupal(){
-    rm ./src/phpinfo.php
+    rm -rf ./src/web
     # Change permissions
     docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
     # realiza la instalación
@@ -315,6 +315,9 @@ start_wordpress_prod() {
 start_drupal() {
     echo "Starting the application with Drupal-specific configuration."
     docker compose -f docker-compose-drupal.yaml up -d --force-recreate
+    mkdir src/web
+    mv src/phpinfo.php src/web/phpinfo.php
+    chmod 755 src/web/phpinfo.php
 }
 
 # Function to start the application with Moodle-specific configuration.

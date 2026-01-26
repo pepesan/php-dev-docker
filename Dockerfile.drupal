@@ -1,5 +1,5 @@
 # Elegimos la versión de PHP8.4 con Debian Trixie como base
-FROM php:8.4-fpm-trixie
+FROM php:8.5-fpm-trixie
 ARG UNAME=www-data
 ARG UGROUP=www-data
 ARG UID=1000
@@ -45,8 +45,7 @@ RUN docker-php-ext-install -j$(nproc) \
     xml \
     intl \
     soap \
-    exif \
-    opcache
+    exif
 
 
 

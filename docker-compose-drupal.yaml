@@ -4,7 +4,7 @@ services:
   # MariaDB Service
   db:
     # imagen de mariadb
-    image: mariadb:11.0.2-jammy
+    image: mariadb:11.8.5-noble
     # nombre del contenedor
     container_name: dev-mariadb
     # variables de entorno
