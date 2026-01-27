@@ -1,4 +1,19 @@
 #!/bin/bash
+ENV_FILE=".env"
+
+echo "Cargando .env desde: $ENV_FILE"
+
+if [[ -f "$ENV_FILE" ]]; then
+  set -a
+  source "$ENV_FILE"
+  set +a
+  echo "cargado fichero .env"
+else
+  echo "ERROR: No existe el fichero .env en: $ENV_FILE" >&2
+  exit 1
+fi
+
+echo "ENVIROMENT='$ENVIROMENT'"
 
 # Help function that displays the usage of the script and available options.
 show_help() {
@@ -160,7 +175,7 @@ initialize_drupal() {
   create_logs_dirs
 
   # Arranca el entorno (define tú start_drupal como start_wordpress pero con el compose de drupal)
-  start_drupal
+  # start_drupal
 }
 
 initialize_laravel(){
@@ -223,7 +238,7 @@ install_wordpress_prod(){
 }
 
 install_drupal(){
-    rm -rf ./src/web
+    sudo rm -rf ./src/*
     # Change permissions
     docker compose -f docker-compose-drupal.yaml exec -it php /bin/bash -c 'chown -R www-data:www-data /var/www/html'
     # realiza la instalación
@@ -315,9 +330,9 @@ start_wordpress_prod() {
 start_drupal() {
     echo "Starting the application with Drupal-specific configuration."
     docker compose -f docker-compose-drupal.yaml up -d --force-recreate
-    mkdir src/web
-    mv src/phpinfo.php src/web/phpinfo.php
-    chmod 755 src/web/phpinfo.php
+    sudo mkdir -p src/web
+    sudo cp init/phpinfo.php src/web/phpinfo.php
+    sudo chmod 755 src/web/phpinfo.php
 }
 
 # Function to start the application with Moodle-specific configuration.
@@ -464,16 +479,14 @@ clean_source_code() {
     sudo rm -rf wordpress
     sudo rm -rf laravel
     sudo rm -rf moodle
-    mkdir -p src
-    cp ./init/phpinfo.php src
 }
 clean_containers(){
   echo "Cleaning PHP container image."
   stop_wordpress
   docker image rm php-dev-docker-php
   docker image rm php-wordpress
-  docker image rm -f dev-php
-  docker rm -f dev-nginx
+  docker image rm -f ${ENVIROMENT}-php
+  docker rm -f ${ENVIROMENT}-nginx
 }
 
 run_inside_docker() {

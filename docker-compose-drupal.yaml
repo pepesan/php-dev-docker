@@ -1,102 +1,64 @@
-# Services
 services:
 
-  # MariaDB Service
   db:
-    # imagen de mariadb
     image: mariadb:11.8.5-noble
-    # nombre del contenedor
-    container_name: dev-mariadb
-    # variables de entorno
+    container_name: "${ENVIROMENT}-mariadb"
     environment:
-      # contraseña de root
       MYSQL_ROOT_PASSWORD: root
-      # nombre de la BBDD
       MYSQL_DATABASE: test
-      # usuario de acceso a la BBDD
       MYSQL_USER: test
-      # contraseña de acceso a ls BBD
       MYSQL_PASSWORD: test
-    # Volumen con los datos de la BBDD
+    ports:
+      - "${MYSQL_PORT}:3306"
     volumes:
       - ./db-data:/var/lib/mysql
 
-  # phpMyAdmin Service
   phpmyadmin:
-    # imagen de Phpmyadmin
     image: phpmyadmin/phpmyadmin:latest
-    # nombre del contenedor
-    container_name: dev-phpmyadmin
-    # accedemos al puerto 8081 local (host) (izquierda)
-    # aunque el puerto del contenedor es el 80 (derecha)
-    # URL: http://localhost:8081
+    container_name: "${ENVIROMENT}-phpmyadmin"
     ports:
-      - 8081:80
-    # Variables de entorno
+      - "${PHPMYADMIN_PORT}:80"
     environment:
-      # definición del nombre del host(contenedor) de la BBDD
       PMA_HOST: db
-    # Se arranca después del contenedor de la BBDD
     depends_on:
       - db
-  # PHP Service
+
   php:
-    # pilla el fichero Dockerfile para crear la imagen
     build:
       context: .
       dockerfile: Dockerfile.drupal
-    # nombre del contenedor PHP
-    container_name: dev-php
+    container_name: "${ENVIROMENT}-php"
     env_file:
       - .env
-    # definición del volumen con el código PHP
     volumes:
       - './src:/var/www/html'
       - './conf/php/.bashrc:/root/.bashrc'
       - './conf/php/php-drupal.ini:/usr/local/etc/php/php.ini'
       - './conf/php/99-xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini:ro'
-    # dependencia del contenedor mariadb
     depends_on:
       - db
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # Nginx Service
   nginx:
-    # pilla la última imagen de nginx
     image: nginx:latest
-    # nombre del contenedor
-    container_name: dev-nginx
-    # user: "1000:1000"
-    # ofrece en el puerto 81 en el host (izquierda)
-    # y en este caso el 81 del contenedor (derecha)
-    # url: http://localhost:81/ ó http://localhost
+    container_name: "${ENVIROMENT}-nginx"
     ports:
-      - 81:80
-    #links:
-    #  - 'php'
-
+      - "${NGINX_PORT}:80"
     volumes:
-      # Define el volumen con el código de PHP
       - './src:/var/www/html'
       - './logs/nginx:/var/log/nginx'
-      # define el volumen con los ficheros de configuración
-      # fichero nginx.conf (host) -> /etc/nginx/conf.d/nginx.conf (contenedor)
       - './conf/nginx-drupal:/etc/nginx/conf.d'
-    # depende del servicio de PHP
     depends_on:
       - php
-  # Varnish Container
+
   varnish:
     image: varnish:fresh
-    depends_on:
-      - nginx
-    container_name: dev-varnish
+    container_name: "${ENVIROMENT}-varnish"
     restart: always
     ports:
-      - 80:80
+      - "${VARNISH_PORT}:80"
     volumes:
-      # if you want to check the logs
       - ./logs/varnish:/var/log/
       - ./conf/varnish-drupal/varnish.vcl:/etc/varnish/default.vcl:ro
     environment:
@@ -106,6 +68,3 @@ services:
     logging:
       options:
         max-size: 10m
-
-
-
