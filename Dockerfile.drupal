@@ -1,15 +1,16 @@
-# Elegimos la versión de PHP8.5 con Debian Trixie como base
+# Base
 FROM php:8.5-fpm-trixie
+
 ARG UNAME=www-data
 ARG UGROUP=www-data
 ARG UID=1000
 ARG GID=1000
 
-RUN usermod  --uid $UID $UNAME
-RUN groupmod --gid $GID $UGROUP
+RUN usermod --uid $UID $UNAME \
+ && groupmod --gid $GID $UGROUP
 
-# Installing dependencies for the PHP modules
-RUN apt-get update && apt-get install -y \
+# Dependencias del sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
     zip \
     libzip-dev \
     libpng-dev \
@@ -25,18 +26,19 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     git \
     nano \
+    bash \
+    curl \
+    ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# GD con soporte JPEG, FreeType y WebP
+# PHP extensions
 RUN docker-php-ext-configure gd \
     --with-freetype \
     --with-jpeg \
     --with-webp \
     --with-avif \
- && docker-php-ext-install gd
-
-# Resto de extensiones
-RUN docker-php-ext-install -j$(nproc) \
+ && docker-php-ext-install \
+    gd \
     mysqli \
     pdo \
     pdo_mysql \
@@ -47,21 +49,42 @@ RUN docker-php-ext-install -j$(nproc) \
     soap \
     exif
 
+# Xdebug
+RUN pecl install xdebug && docker-php-ext-enable xdebug
 
+# Composer
+RUN curl -sS https://getcomposer.org/installer \
+ | php -- --install-dir=/usr/local/bin --filename=composer
 
+# -------------------------------------------------
+# NVM + Node.js 24 (USANDO EL INSTALADOR OFICIAL)
+# -------------------------------------------------
 
-## Installing xdebug extension
-RUN pecl install xdebug \
-    && docker-php-ext-enable xdebug
+ENV NVM_DIR=/usr/local/nvm
+ENV NODE_VERSION=24
 
-RUN chmod 777 /var/www
+# Usar bash para que nvm funcione
+SHELL ["/bin/bash", "-lc"]
 
+# Instalar NVM con el instalador oficial
+RUN mkdir -p "$NVM_DIR" \
+ && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
-# instalando composer
-# Descargar e instalar Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Instalar Node 24 y hacerlo global
+RUN source "$NVM_DIR/nvm.sh" \
+ && nvm install "$NODE_VERSION" \
+ && nvm alias default "$NODE_VERSION" \
+ && nvm use default \
+ && NODE_BIN_DIR="$(dirname "$(nvm which default)")" \
+ && ln -sf "$NODE_BIN_DIR/node" /usr/local/bin/node \
+ && ln -sf "$NODE_BIN_DIR/npm"  /usr/local/bin/npm \
+ && ln -sf "$NODE_BIN_DIR/npx"  /usr/local/bin/npx
 
-# poner un php.ini de desarrollo
-# RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-# poner un php.ini de producción
-# RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+# Cargar NVM automáticamente al entrar en bash
+RUN printf '%s\n' \
+ 'export NVM_DIR=/usr/local/nvm' \
+ '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' \
+ > /etc/profile.d/nvm.sh
+
+# Verificación (si esto falla, el build falla)
+# RUN node -v && npm -v
